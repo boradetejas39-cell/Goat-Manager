@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     let dailyLogs = JSON.parse(localStorage.getItem('dailyLogs')) || [];
 
-    //  MILK_PRICE = 50; // ₹ per lconstiter
+     MILK_PRICE = 50; // ₹ per lconstiter
     // optional milk price input (may not be present in UI)
     const milkPriceInput = document.getElementById('milkPriceInput');
     let currentMilkPrice = MILK_PRICE;
