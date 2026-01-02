@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tagesschrift&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/script.js" defer></script>
+    <title>Goat Management System</title>
+</head>
+<body>
+    <!-- Header -->
+    <section class="top-bar" id="topBar">
+        <h1 class="logo">🐐 Goat Management System</h1>
+        <nav class="nav-links">
+            <a href="#goatDetails">Goat Details</a> |
+            <a href="#dailyLog">Daily Log</a> |
+            <a href="#report">Report</a>
+        </nav>
+    </section>
+
+    <!-- Main Content -->
+    <section class="container">
+        <!-- Goat Details Form -->
+        <div id="goatDetails" class="form-section">
+            <h2>📋 Add Goat Information</h2>
+            <form id="goatForm" class="form-container">
+                <div class="form-group">
+                    <label for="goatId">Goat Number/ID:</label>
+                    <input type="text" id="goatId" name="goatId" placeholder="e.g., Goat-1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="goatName">Goat Name:</label>
+                    <input type="text" id="goatName" name="goatName" placeholder="e.g., Bhuri" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="goatAge">Age (years):</label>
+                        <input type="number" id="goatAge" name="goatAge" placeholder="e.g., 2" min="0" step="0.5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goatWeight">Weight (kg):</label>
+                        <input type="number" id="goatWeight" name="goatWeight" placeholder="e.g., 40" min="0" step="0.5" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="purchaseDate">Purchase Date:</label>
+                        <input type="date" id="purchaseDate" name="purchaseDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="purchasePrice">Purchase Price (₹):</label>
+                        <input type="number" id="purchasePrice" name="purchasePrice" placeholder="e.g., 5000" min="0" step="0.01" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="goatPhoto">Upload Photo:</label>
+                    <input type="file" id="goatPhoto" name="goatPhoto" accept="image/*">
+                    <small>Optional: Upload a photo of your goat</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Goat Details</button>
+                <span id="goatFormMessage" class="message"></span>
+            </form>
+
+            <!-- Goat List Display -->
+            <div class="goat-list-section">
+                <h3>📌 Registered Goats</h3>
+                <div id="goatListDisplay" class="goat-cards">
+                    <!-- Goats will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Log Form -->
+        <div id="dailyLog" class="form-section">
+            <h2>📝 Daily Log Entry</h2>
+            <form id="dailyLogForm" class="form-container">
+                <div class="form-group">
+                    <label for="logGoatId">Select Goat:</label>
+                    <select id="logGoatId" required>
+                        <option value="">-- Select a Goat --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="logDate">Date:</label>
+                    <input type="date" id="logDate" name="logDate" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="feedCost">Daily Feed Cost (₹):</label>
+                        <input type="number" id="feedCost" name="feedCost" placeholder="e.g., 50" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="milkProduced">Milk Produced (liters):</label>
+                        <input type="number" id="milkProduced" name="milkProduced" placeholder="e.g., 2.5" min="0" step="0.1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="medicalTreatment">Medical Treatment/Health Notes:</label>
+                    <textarea id="medicalTreatment" name="medicalTreatment" placeholder="e.g., Vaccination, antibiotic, health observation"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Daily Log</button>
+                <span id="logFormMessage" class="message"></span>
+            </form>
+
+            <!-- Log History Display -->
+            <div class="log-history-section">
+                <h3>📊 Recent Logs</h3>
+                <div id="logHistoryDisplay" class="log-list">
+                    <!-- Logs will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="report" class="form-section">
+            <h2>📈 Financial Report</h2>
+            <button id="generateReportBtn" class="btn btn-success">Generate Report</button>
+
+            <div id="reportDisplay" class="report-container">
+                <div class="report-card">
+                    <h3>💰 Total Expenses</h3>
+                    <p class="report-value" id="totalExpense">₹0</p>
+                </div>
+
+                <div class="report-card">
+                    <h3>🥛 Total Milk Revenue</h3>
+                    <p class="report-value" id="totalRevenue">₹0</p>
+                </div>
+
+                <div class="report-card">
+                    <h3>📊 Net Profit/Loss</h3>
+                    <p class="report-value" id="netProfit">₹0</p>
+                </div>
+
+                <div class="report-card">
+                    <h3>📋 Total Milk Produced</h3>
+                    <p class="report-value" id="totalMilk">0 liters</p>
+                </div>
+
+                <div class="report-card">
+                    <h3>🐐 Total Goats</h3>
+                    <p class="report-value" id="totalGoats">0</p>
+                </div>
+
+                <div class="report-card">
+                    <h3>💸 Average Cost per Goat</h3>
+                    <p class="report-value" id="avgCostPerGoat">₹0</p>
+                </div>
+            </div>
+
+            <!-- Detailed Report Table -->
+            <div id="detailedReportSection" class="detailed-report">
+                <h3>📋 Detailed Breakdown</h3>
+                <table id="detailedReportTable" class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Goat ID</th>
+                            <th>Purchase Price</th>
+                            <th>Total Feed Cost</th>
+                            <th>Milk Produced (L)</th>
+                            <th>Milk Revenue</th>
+                            <th>Net P/L</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table rows will be added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

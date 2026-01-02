@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goat Management - Data Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .card h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .card .value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .empty {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            padding: 20px;
+            font-weight: 600;
+        }
+
+        .error {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .refresh-btn:hover {
+            background: #764ba2;
+        }
+
+        nav {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        nav a {
+            display: inline-block;
+            padding: 8px 16px;
+            margin-right: 10px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        nav a:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐐 Goat Management System - Data Viewer</h1>
+            <p>Real-time database viewer for all goats, logs, and financial data</p>
+        </header>
+
+        <nav>
+            <a href="/goat.html">← Back to App</a>
+            <button class="refresh-btn" onclick="loadAllData()">🔄 Refresh Data</button>
+        </nav>
+
+        <!-- Summary Cards -->
+        <div class="section">
+            <h2>📊 Financial Summary</h2>
+            <div id="summaryError"></div>
+            <div class="summary-cards" id="summaryCards">
+                <div class="loading">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Goats Table -->
+        <div class="section">
+            <h2>🐐 Registered Goats</h2>
+            <div id="goatsError"></div>
+            <table id="goatsTable">
+                <thead>
+                    <tr>
+                        <th>Goat ID</th>
+                        <th>Name</th>
+                        <th>Age (years)</th>
+                        <th>Weight (kg)</th>
+                        <th>Purchase Date</th>
+                        <th>Purchase Price (₹)</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="7" class="loading">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Daily Logs Table -->
+        <div class="section">
+            <h2>📝 Daily Logs</h2>
+            <div id="logsError"></div>
+            <table id="logsTable">
+                <thead>
+                    <tr>
+                        <th>Goat ID</th>
+                        <th>Log Date</th>
+                        <th>Feed Cost (₹)</th>
+                        <th>Milk Produced (L)</th>
+                        <th>Medical Treatment</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="6" class="loading">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Detailed Report Table -->
+        <div class="section">
+            <h2>📈 Detailed Profit/Loss Report</h2>
+            <div id="reportError"></div>
+            <table id="reportTable">
+                <thead>
+                    <tr>
+                        <th>Goat ID</th>
+                        <th>Name</th>
+                        <th>Purchase Price (₹)</th>
+                        <th>Total Feed Cost (₹)</th>
+                        <th>Milk Produced (L)</th>
+                        <th>Milk Revenue (₹)</th>
+                        <th>Net P/L (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="7" class="loading">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+
+        async function loadAllData() {
+            await Promise.all([
+                loadSummary(),
+                loadGoats(),
+                loadLogs(),
+                loadDetailedReport()
+            ]);
+        }
+
+        async function loadSummary() {
+            try {
+                const res = await fetch(`${API_BASE}/reports/summary`);
+                if (!res.ok) throw new Error('Failed to load summary');
+                const data = await res.json();
+
+                const cards = `
+                    <div class="card">
+                        <h3>Total Goats</h3>
+                        <div class="value">${data.totalGoats}</div>
+                    </div>
+                    <div class="card">
+                        <h3>Total Expenses</h3>
+                        <div class="value">₹${(data.totalExpense || 0).toFixed(2)}</div>
+                    </div>
+                    <div class="card">
+                        <h3>Total Milk Revenue</h3>
+                        <div class="value">₹${(data.totalRevenue || 0).toFixed(2)}</div>
+                    </div>
+                    <div class="card">
+                        <h3>Net Profit/Loss</h3>
+                        <div class="value">${data.netProfit >= 0 ? '+' : ''}₹${(data.netProfit || 0).toFixed(2)}</div>
+                    </div>
+                    <div class="card">
+                        <h3>Total Milk</h3>
+                        <div class="value">${(data.totalMilk || 0).toFixed(2)} L</div>
+                    </div>
+                    <div class="card">
+                        <h3>Avg Cost/Goat</h3>
+                        <div class="value">₹${(data.avgCostPerGoat || 0).toFixed(2)}</div>
+                    </div>
+                `;
+                document.getElementById('summaryCards').innerHTML = cards;
+                document.getElementById('summaryError').innerHTML = '';
+            } catch (err) {
+                document.getElementById('summaryError').innerHTML = `<div class="error">Error: ${err.message}</div>`;
+                document.getElementById('summaryCards').innerHTML = '<div class="empty">No data available</div>';
+            }
+        }
+
+        async function loadGoats() {
+            try {
+                const res = await fetch(`${API_BASE}/goats`);
+                if (!res.ok) throw new Error('Failed to load goats');
+                const goats = await res.json();
+
+                const tbody = document.querySelector('#goatsTable tbody');
+                if (goats.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty">No goats registered</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = goats.map(g => `
+                    <tr>
+                        <td><strong>${g.goatId}</strong></td>
+                        <td>${g.name}</td>
+                        <td>${g.age || '-'}</td>
+                        <td>${g.weight || '-'}</td>
+                        <td>${new Date(g.purchaseDate).toLocaleDateString('en-IN')}</td>
+                        <td>₹${parseFloat(g.purchasePrice || 0).toFixed(2)}</td>
+                        <td>${new Date(g.created_at).toLocaleString('en-IN')}</td>
+                    </tr>
+                `).join('');
+                document.getElementById('goatsError').innerHTML = '';
+            } catch (err) {
+                document.getElementById('goatsError').innerHTML = `<div class="error">Error: ${err.message}</div>`;
+                document.querySelector('#goatsTable tbody').innerHTML = '<tr><td colspan="7" class="empty">Failed to load</td></tr>';
+            }
+        }
+
+        async function loadLogs() {
+            try {
+                const res = await fetch(`${API_BASE}/logs`);
+                if (!res.ok) throw new Error('Failed to load logs');
+                const logs = await res.json();
+
+                const tbody = document.querySelector('#logsTable tbody');
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="empty">No logs recorded</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = logs.slice(-50).reverse().map(log => `
+                    <tr>
+                        <td><strong>${log.goatId || 'N/A'}</strong></td>
+                        <td>${new Date(log.log_date).toLocaleDateString('en-IN')}</td>
+                        <td>₹${parseFloat(log.feed_cost || 0).toFixed(2)}</td>
+                        <td>${parseFloat(log.milk_produced || 0).toFixed(2)}</td>
+                        <td>${log.medical_treatment || '-'}</td>
+                        <td>${new Date(log.created_at).toLocaleString('en-IN')}</td>
+                    </tr>
+                `).join('');
+                document.getElementById('logsError').innerHTML = '';
+            } catch (err) {
+                document.getElementById('logsError').innerHTML = `<div class="error">Error: ${err.message}</div>`;
+                document.querySelector('#logsTable tbody').innerHTML = '<tr><td colspan="6" class="empty">Failed to load</td></tr>';
+            }
+        }
+
+        async function loadDetailedReport() {
+            try {
+                const res = await fetch(`${API_BASE}/reports/detailed`);
+                if (!res.ok) throw new Error('Failed to load report');
+                const report = await res.json();
+
+                const tbody = document.querySelector('#reportTable tbody');
+                if (report.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty">No data available</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = report.map(r => `
+                    <tr>
+                        <td><strong>${r.goatId}</strong></td>
+                        <td>${r.name}</td>
+                        <td>₹${parseFloat(r.purchasePrice || 0).toFixed(2)}</td>
+                        <td>₹${parseFloat(r.totalFeedCost || 0).toFixed(2)}</td>
+                        <td>${parseFloat(r.totalMilk || 0).toFixed(2)}</td>
+                        <td>₹${parseFloat(r.milkRevenue || 0).toFixed(2)}</td>
+                        <td style="font-weight: bold; color: ${(r.netPL || 0) >= 0 ? '#28a745' : '#dc3545'};">
+                            ${(r.netPL || 0) >= 0 ? '+' : ''}₹${parseFloat(r.netPL || 0).toFixed(2)}
+                        </td>
+                    </tr>
+                `).join('');
+                document.getElementById('reportError').innerHTML = '';
+            } catch (err) {
+                document.getElementById('reportError').innerHTML = `<div class="error">Error: ${err.message}</div>`;
+                document.querySelector('#reportTable tbody').innerHTML = '<tr><td colspan="7" class="empty">Failed to load</td></tr>';
+            }
+        }
+
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', loadAllData);
+    </script>
+</body>
+</html>
