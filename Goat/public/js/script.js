@@ -228,38 +228,40 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /* =============== UPDATE REPORT =============== */
-    function updateReport() {
-        let totalExpense = 0;
-        let totalMilk = 0;
-        let totalPurchasePrice = 0;
+function updateReport() {
+    let totalExpense = 0;
+    let totalMilk = 0;
+    let totalPurchasePrice = 0;
 
-        // Calculate totals
-        dailyLogs.forEach(log => {
-            totalExpense += log.feedCost;
-            totalMilk += log.milkProduced;
-        });
+    // Calculate totals
+    dailyLogs.forEach(log => {
+        totalExpense += log.feedCost;
+        totalMilk += log.milkProduced;
+    });
 
-        goats.forEach(goat => {
-            totalPurchasePrice += goat.purchasePrice;
-        });
+    goats.forEach(goat => {
+        totalPurchasePrice += goat.purchasePrice;
+    });
 
-        const totalRevenue = totalMilk * MILK_PRICE;
-        const totalCost = totalExpense + totalPurchasePrice;
-        const netProfit = totalRevenue - totalCost;
-        const avgCostPerGoat = goats.length > 0 ? (totalCost / goats.length).toFixed(2) : 0;
+    const totalRevenue = totalMilk * MILK_PRICE;
+    const totalCost = totalExpense + totalPurchasePrice;
+    const netProfit = totalRevenue - totalCost;
 
-        // Update report cards
-        document.getElementById('totalExpense').textContent = '₹' + (totalExpense + totalPurchasePrice).toFixed(2);
-        document.getElementById('totalRevenue').textContent = '₹' + totalRevenue.toFixed(2);
-        document.getElementById('netProfit').textContent = (netProfit >= 0 ? '₹+' : '₹') + netProfit.toFixed(2);
-        document.getElementById('netProfit').style.color = netProfit >= 0 ? '#28a745' : '#dc3545';
-        document.getElementById('totalMilk').textContent = totalMilk.toFixed(2) + ' liters';
-        document.getElementById('totalGoats').textContent = goats.length;
-        document.getElementById('avgCostPerGoat').textContent = '₹' + avgCostPerGoat;
+    // Remove the average cost per goat from the report
+    const avgCostPerGoat = '';
 
-        // Update detailed report table
-        updateDetailedReport();
-    }
+    // Update report cards
+    document.getElementById('totalExpense').textContent = '₹' + (totalExpense + totalPurchasePrice).toFixed(2);
+    document.getElementById('totalRevenue').textContent = '₹' + totalRevenue.toFixed(2);
+    document.getElementById('netProfit').textContent = (netProfit >= 0 ? '₹+' : '₹') + netProfit.toFixed(2);
+    document.getElementById('netProfit').style.color = netProfit >= 0 ? '#28a745' : '#dc3545';
+    document.getElementById('totalMilk').textContent = totalMilk.toFixed(2) + ' liters';
+    document.getElementById('totalGoats').textContent = goats.length;
+    document.getElementById('avgCostPerGoat').textContent = avgCostPerGoat;
+
+    // Update detailed report table
+    updateDetailedReport();
+}
 
     /* =============== UPDATE DETAILED REPORT TABLE =============== */
     function updateDetailedReport() {
@@ -271,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const goatLogs = dailyLogs.filter(log => log.goatId === goat.goatId);
             const totalFeedCost = goatLogs.reduce((sum, log) => sum + log.feedCost, 0);
             const totalMilk = goatLogs.reduce((sum, log) => sum + log.milkProduced, 0);
-            const milkRevenue = totalMilk * MILK_PRICE;
+             const milkRevenue = totalMilk * MILK_PRICE;
             const totalCost = goat.purchasePrice + totalFeedCost;
             const netPL = milkRevenue - totalCost;
 
