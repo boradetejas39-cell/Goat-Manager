@@ -354,7 +354,9 @@ html, body {
 /* Detailed Report Table */
 .detailed-report {
     margin-top: 40px;
+    overflow-x: scroll;
 }
+
 
 .detailed-report h3 {
     color: #28a745;
