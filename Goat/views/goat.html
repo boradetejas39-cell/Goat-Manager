@@ -66,6 +66,11 @@
                     <small>Optional: Upload a photo of your goat</small>
                 </div>
 
+                <div class="form-group">
+                    <label for="goatAllegations">Allegations/Notes:</label>
+                    <textarea id="goatAllegations" name="goatAllegations" placeholder="e.g., Special characteristics, health notes, breeding information"></textarea>
+                </div>
+
                 <button type="submit" class="btn btn-primary">Save Goat Details</button>
                 <span id="goatFormMessage" class="message"></span>
             </form>
@@ -103,6 +108,13 @@
                     <div class="form-group">
                         <label for="milkProduced">Milk Produced (liters):</label>
                         <input type="number" id="milkProduced" name="milkProduced" placeholder="e.g., 2.5" min="0" step="0.1">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="milkPrice">Milk Price per Liter (₹):</label>
+                        <input type="number" id="milkPrice" name="milkPrice" placeholder="e.g., 50" min="0" step="0.01" required>
                     </div>
                 </div>
 
@@ -153,11 +165,6 @@
                 <div class="report-card">
                     <h3>🐐 Total Goats</h3>
                     <p class="report-value" id="totalGoats">0</p>
-                </div>
-
-                <div class="report-card">
-                    <h3>💸 Average Cost per Goat</h3>
-                    <p class="report-value" id="avgCostPerGoat">₹0</p>
                 </div>
             </div>
 

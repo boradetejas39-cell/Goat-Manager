@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Preference = require('../models/Preference');
 
 // MongoDB connection string
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://tej_01_:%23Mrtejas01@cluster0.mmna8kp.mongodb.net/goat_management?appName=Cluster0';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://tej_01_:Goat118@cluster0.mmna8kp.mongodb.net/goat_management?appName=Cluster0';
 
 // Connect to MongoDB
 const connectDB = async () => {

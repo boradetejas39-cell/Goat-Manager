@@ -32,13 +32,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     let dailyLogs = JSON.parse(localStorage.getItem('dailyLogs')) || [];
 
-     MILK_PRICE = 50; // ₹ per lconstiter
-    // optional milk price input (may not be present in UI)
+    // Milk price will be dynamic based on user input
     const milkPriceInput = document.getElementById('milkPriceInput');
-    let currentMilkPrice = MILK_PRICE;
+    let currentMilkPrice = 0;
     if (milkPriceInput) {
         milkPriceInput.addEventListener('change', function () {
-            currentMilkPrice = parseFloat(this.value) || MILK_PRICE;
+            currentMilkPrice = parseFloat(this.value) || 0;
             updateReport();
         });
     }
@@ -60,7 +59,8 @@ document.addEventListener('DOMContentLoaded', function () {
             weight: parseFloat(document.getElementById('goatWeight').value),
             purchaseDate: document.getElementById('purchaseDate').value,
             purchasePrice: parseFloat(document.getElementById('purchasePrice').value),
-            photo: null // Photo would be stored as base64 or file path
+            photo: null, // Photo would be stored as base64 or file path
+            allegations: document.getElementById('goatAllegations').value.trim()
         };
 
         // Handle photo upload (store as base64)
@@ -91,7 +91,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         weight: goatData.weight,
                         purchaseDate: goatData.purchaseDate,
                         purchasePrice: goatData.purchasePrice,
-                        photo: goatData.photo || null
+                        photo: goatData.photo || null,
+                        allegations: goatData.allegations || null
                     })
                 });
 
@@ -107,7 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     weight: created.weight || goatData.weight,
                     purchaseDate: created.purchaseDate || goatData.purchaseDate,
                     purchasePrice: parseFloat(created.purchasePrice || goatData.purchasePrice) || 0,
-                    photo: created.photo || goatData.photo || null
+                    photo: created.photo || goatData.photo || null,
+                    allegations: created.allegations || goatData.allegations || null
                 };
 
                 goats.push(entry);
@@ -152,11 +154,67 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p><strong>Weight:</strong> ${goat.weight} kg</p>
                 <p><strong>Purchased:</strong> ${formatDate(goat.purchaseDate)}</p>
                 <p><strong>Price:</strong> ₹${goat.purchasePrice.toFixed(2)}</p>
+                ${goat.allegations ? `<p><strong>Notes:</strong> ${goat.allegations}</p>` : ''}
                 ${goat.photo ? `<img src="${goat.photo}" alt="${goat.name}">` : '<p style="color: #999;">No photo uploaded</p>'}
+                <div class="card-actions">
+                    <button class="btn btn-danger btn-sm" onclick="deleteGoat('${goat.id}', '${goat.goatId}')">
+                        <i class="fas fa-trash"></i> Remove
+                    </button>
+                </div>
             `;
             goatListDisplay.appendChild(card);
         });
     }
+
+    // Expose functions and variables to global scope
+    window.goatManagerApp = {
+        goats,
+        dailyLogs,
+        displayGoatCards,
+        populateGoatSelect,
+        updateReport,
+        deleteGoat: function(id, goatId) {
+            if (confirm(`Are you sure you want to remove ${goatId}? This will also delete all daily logs associated with this goat.`)) {
+                // Try to delete from backend first
+                (async () => {
+                    try {
+                        const res = await fetch(`/api/goats/${id}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (!res.ok) throw new Error('Server error');
+
+                        // Remove from local arrays
+                        window.goatManagerApp.goats = window.goatManagerApp.goats.filter(goat => goat.id !== id);
+                        window.goatManagerApp.dailyLogs = window.goatManagerApp.dailyLogs.filter(log => log.goatId !== goatId);
+                        
+                        // Update localStorage
+                        localStorage.setItem('goats', JSON.stringify(window.goatManagerApp.goats));
+                        localStorage.setItem('dailyLogs', JSON.stringify(window.goatManagerApp.dailyLogs));
+
+                        // Update display
+                        displayGoatCards();
+                        populateGoatSelect();
+                        updateReport();
+                        return;
+                    } catch (err) {
+                        // fallback to localStorage when backend unavailable
+                        window.goatManagerApp.goats = window.goatManagerApp.goats.filter(goat => goat.id !== id);
+                        window.goatManagerApp.dailyLogs = window.goatManagerApp.dailyLogs.filter(log => log.goatId !== goatId);
+                        
+                        // Update localStorage
+                        localStorage.setItem('goats', JSON.stringify(window.goatManagerApp.goats));
+                        localStorage.setItem('dailyLogs', JSON.stringify(window.goatManagerApp.dailyLogs));
+
+                        // Update display
+                        displayGoatCards();
+                        populateGoatSelect();
+                    }
+                })();
+            }
+            return;
+        }
+    };
 
     /* =============== DAILY LOG FORM SUBMISSION =============== */
     dailyLogForm.addEventListener('submit', function (e) {
@@ -173,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
             date: document.getElementById('logDate').value,
             feedCost: parseFloat(document.getElementById('feedCost').value),
             milkProduced: parseFloat(document.getElementById('milkProduced').value) || 0,
+            milkPrice: parseFloat(document.getElementById('milkPrice').value) || 0,
             medicalTreatment: document.getElementById('medicalTreatment').value.trim()
         };
 
@@ -205,6 +264,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p><strong>Goat ID:</strong> ${log.goatId}</p>
                 <p><strong>Feed Cost:</strong> ₹${log.feedCost.toFixed(2)}</p>
                 <p><strong>Milk Produced:</strong> ${log.milkProduced} liters</p>
+                ${log.milkPrice ? `<p><strong>Milk Price:</strong> ₹${log.milkPrice.toFixed(2)}/liter</p>` : ''}
                 ${log.medicalTreatment ? `<p><strong>Medical Note:</strong> ${log.medicalTreatment}</p>` : ''}
             `;
             logHistoryDisplay.appendChild(entry);
@@ -216,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const logGoatId = document.getElementById('logGoatId');
         const currentValue = logGoatId.value;
         logGoatId.innerHTML = '<option value="">-- Select a Goat --</option>';
-
+        
         goats.forEach(goat => {
             const option = document.createElement('option');
             option.value = goat.goatId;
@@ -228,40 +288,39 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /* =============== UPDATE REPORT =============== */
-function updateReport() {
-    let totalExpense = 0;
-    let totalMilk = 0;
-    let totalPurchasePrice = 0;
+    function updateReport() {
+        let totalExpense = 0;
+        let totalMilk = 0;
+        let totalPurchasePrice = 0;
 
-    // Calculate totals
-    dailyLogs.forEach(log => {
-        totalExpense += log.feedCost;
-        totalMilk += log.milkProduced;
-    });
+        // Calculate totals
+        let totalRevenue = 0;
+        dailyLogs.forEach(log => {
+            totalExpense += log.feedCost;
+            totalMilk += log.milkProduced;
+            if (log.milkPrice && log.milkProduced) {
+                totalRevenue += log.milkProduced * log.milkPrice;
+            }
+        });
 
-    goats.forEach(goat => {
-        totalPurchasePrice += goat.purchasePrice;
-    });
+        goats.forEach(goat => {
+            totalPurchasePrice += goat.purchasePrice;
+        });
 
-    const totalRevenue = totalMilk * MILK_PRICE;
-    const totalCost = totalExpense + totalPurchasePrice;
-    const netProfit = totalRevenue - totalCost;
+        const totalCost = totalExpense + totalPurchasePrice;
+        const netProfit = totalRevenue - totalCost;
 
-    // Remove the average cost per goat from the report
-    const avgCostPerGoat = '';
+        // Update report cards
+        document.getElementById('totalExpense').textContent = '₹' + (totalExpense + totalPurchasePrice).toFixed(2);
+        document.getElementById('totalRevenue').textContent = '₹' + totalRevenue.toFixed(2);
+        document.getElementById('netProfit').textContent = (netProfit >= 0 ? '₹+' : '₹') + netProfit.toFixed(2);
+        document.getElementById('netProfit').style.color = netProfit >= 0 ? '#28a745' : '#dc3545';
+        document.getElementById('totalMilk').textContent = totalMilk.toFixed(2) + ' liters';
+        document.getElementById('totalGoats').textContent = goats.length;
 
-    // Update report cards
-    document.getElementById('totalExpense').textContent = '₹' + (totalExpense + totalPurchasePrice).toFixed(2);
-    document.getElementById('totalRevenue').textContent = '₹' + totalRevenue.toFixed(2);
-    document.getElementById('netProfit').textContent = (netProfit >= 0 ? '₹+' : '₹') + netProfit.toFixed(2);
-    document.getElementById('netProfit').style.color = netProfit >= 0 ? '#28a745' : '#dc3545';
-    document.getElementById('totalMilk').textContent = totalMilk.toFixed(2) + ' liters';
-    document.getElementById('totalGoats').textContent = goats.length;
-    document.getElementById('avgCostPerGoat').textContent = avgCostPerGoat;
-
-    // Update detailed report table
-    updateDetailedReport();
-}
+        // Update detailed report table
+        updateDetailedReport();
+    }
 
     /* =============== UPDATE DETAILED REPORT TABLE =============== */
     function updateDetailedReport() {
@@ -269,11 +328,16 @@ function updateReport() {
         tbody.innerHTML = '';
 
         goats.forEach(goat => {
-            // Calculate expenses for this goat
+            // Calculate expenses and revenue for this goat
             const goatLogs = dailyLogs.filter(log => log.goatId === goat.goatId);
             const totalFeedCost = goatLogs.reduce((sum, log) => sum + log.feedCost, 0);
             const totalMilk = goatLogs.reduce((sum, log) => sum + log.milkProduced, 0);
-             const milkRevenue = totalMilk * MILK_PRICE;
+            let milkRevenue = 0;
+            goatLogs.forEach(log => {
+                if (log.milkPrice && log.milkProduced) {
+                    milkRevenue += log.milkProduced * log.milkPrice;
+                }
+            });
             const totalCost = goat.purchasePrice + totalFeedCost;
             const netPL = milkRevenue - totalCost;
 
@@ -338,6 +402,53 @@ function updateReport() {
     // Set today's date as default
     document.getElementById('logDate').valueAsDate = new Date();
 });
+
+/* =============== GLOBAL DELETE GOAT FUNCTION =============== */
+function deleteGoat(id, goatId) {
+    if (confirm(`Are you sure you want to remove ${goatId}? This will also delete all daily logs associated with this goat.`)) {
+        // Try to delete from backend first
+        (async () => {
+            try {
+                const res = await fetch(`/api/goats/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!res.ok) throw new Error('Server error');
+
+                // Remove from local arrays
+                window.goatManagerApp.goats = window.goatManagerApp.goats.filter(goat => goat.id !== id);
+                window.goatManagerApp.dailyLogs = window.goatManagerApp.dailyLogs.filter(log => log.goatId !== goatId);
+                
+                // Update localStorage
+                localStorage.setItem('goats', JSON.stringify(window.goatManagerApp.goats));
+                localStorage.setItem('dailyLogs', JSON.stringify(window.goatManagerApp.dailyLogs));
+
+                // Update display
+                window.goatManagerApp.displayGoatCards();
+                window.goatManagerApp.populateGoatSelect();
+                window.goatManagerApp.updateReport();
+                
+                alert('Goat and all related logs deleted successfully!');
+                return;
+            } catch (err) {
+                // fallback to localStorage when backend unavailable
+                window.goatManagerApp.goats = window.goatManagerApp.goats.filter(goat => goat.id !== id);
+                window.goatManagerApp.dailyLogs = window.goatManagerApp.dailyLogs.filter(log => log.goatId !== goatId);
+                
+                // Update localStorage
+                localStorage.setItem('goats', JSON.stringify(window.goatManagerApp.goats));
+                localStorage.setItem('dailyLogs', JSON.stringify(window.goatManagerApp.dailyLogs));
+
+                // Update display
+                window.goatManagerApp.displayGoatCards();
+                window.goatManagerApp.populateGoatSelect();
+                window.goatManagerApp.updateReport();
+                
+                alert('Goat deleted locally (server unavailable).');
+            }
+        })();
+    }
+}
 
 /* =============== STICKY HEADER ON SCROLL =============== */
 const topBar = document.getElementById('topBar');
