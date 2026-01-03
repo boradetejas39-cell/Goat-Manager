@@ -36,12 +36,6 @@ exports.createGoat = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Check if goat limit reached
-    const count = await Goat.countDocuments();
-    if (count >= 5) {
-      return res.status(400).json({ error: 'Maximum 5 goats allowed' });
-    }
-
     const goat = new Goat({
       goatId,
       name,

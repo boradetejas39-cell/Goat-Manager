@@ -24,11 +24,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
         } catch (e) {
-            // ignore and fallback
+            console.error('Failed to load goats from server, falling back to localStorage.', e);
         }
 
-        // fallback to localStorage if API failed
-        goats = JSON.parse(localStorage.getItem('goats')) || [];
     }
     let dailyLogs = JSON.parse(localStorage.getItem('dailyLogs')) || [];
 
@@ -59,8 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
             weight: parseFloat(document.getElementById('goatWeight').value),
             purchaseDate: document.getElementById('purchaseDate').value,
             purchasePrice: parseFloat(document.getElementById('purchasePrice').value),
-            photo: null, // Photo would be stored as base64 or file path
-            allegations: document.getElementById('goatAllegations').value.trim()
+            photo: null // Photo would be stored as base64 or file path
         };
 
         // Handle photo upload (store as base64)
@@ -91,8 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         weight: goatData.weight,
                         purchaseDate: goatData.purchaseDate,
                         purchasePrice: goatData.purchasePrice,
-                        photo: goatData.photo || null,
-                        allegations: goatData.allegations || null
+                        photo: goatData.photo || null
                     })
                 });
 
@@ -108,8 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     weight: created.weight || goatData.weight,
                     purchaseDate: created.purchaseDate || goatData.purchaseDate,
                     purchasePrice: parseFloat(created.purchasePrice || goatData.purchasePrice) || 0,
-                    photo: created.photo || goatData.photo || null,
-                    allegations: created.allegations || goatData.allegations || null
+                    photo: created.photo || goatData.photo || null
                 };
 
                 goats.push(entry);
@@ -154,7 +149,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p><strong>Weight:</strong> ${goat.weight} kg</p>
                 <p><strong>Purchased:</strong> ${formatDate(goat.purchaseDate)}</p>
                 <p><strong>Price:</strong> ₹${goat.purchasePrice.toFixed(2)}</p>
-                ${goat.allegations ? `<p><strong>Notes:</strong> ${goat.allegations}</p>` : ''}
                 ${goat.photo ? `<img src="${goat.photo}" alt="${goat.name}">` : '<p style="color: #999;">No photo uploaded</p>'}
                 <div class="card-actions">
                     <button class="btn btn-danger btn-sm" onclick="deleteGoat('${goat.id}', '${goat.goatId}')">
