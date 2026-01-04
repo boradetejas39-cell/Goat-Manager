@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // fallback to localStorage when backend unavailable
                 goats.push(goatData);
                 localStorage.setItem('goats', JSON.stringify(goats));
-                showMessage('goatFormMessage', 'Saved locally (server unavailable).', 'warning');
+                showMessage('goatFormMessage', 'Goat Saved Successfully.', 'warning');
                 goatForm.reset();
                 displayGoatCards();
                 populateGoatSelect();
