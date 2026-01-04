@@ -44,11 +44,6 @@ document.addEventListener('DOMContentLoaded', function () {
     goatForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        if (goats.length >= 5) {
-            showMessage('goatFormMessage', 'Only 5 goats are allowed!', 'error');
-            return;
-        }
-
         const goatData = {
             id: generateId(),
             goatId: document.getElementById('goatId').value.trim(),
