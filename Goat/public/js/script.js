@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
             card.innerHTML = `
                 <h4>${goat.goatId}</h4>
                 <p><strong>Name:</strong> ${goat.name}</p>
-                <p><strong>Age:</strong> ${goat.age} years</p>
+                <p><strong>Age:</strong> ${goat.age} months</p>
                 <p><strong>Weight:</strong> ${goat.weight} kg</p>
                 <p><strong>Purchased:</strong> ${formatDate(goat.purchaseDate)}</p>
                 <p><strong>Price:</strong> ₹${goat.purchasePrice.toFixed(2)}</p>
